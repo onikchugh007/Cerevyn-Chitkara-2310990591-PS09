@@ -14,8 +14,8 @@
 | **Problem Statement ID** | **Problem Statement 09 (PS09)** |
 | **Project Title** | Adaptive Memory Matching Game (Synapse Engine / MEMEMIND) |
 | **Repository Name** | `Cerevyn-Chitkara-210990591-PS09` |
-| **Evaluated Release Tag** | `v1.0.0` |
-| **Evaluated Commit Hash** | `862d359` |
+| **Evaluated Release Tag** | `v1.1.0` (Multi-Device Responsive Release) |
+| **CI / CD Pipeline Status** | ![CI](https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09/actions/workflows/ci.yml/badge.svg) |
 
 ---
 
@@ -40,6 +40,8 @@ Memory matching games traditionally rely on static, nondeterministic card layout
    - Cancels pending mismatch resolution timers immediately upon restart.
 7. **Operates entirely self-contained**:
    - Free of paid APIs, telephone calls, or live WhatsApp services.
+8. **Delivers a responsive, ergonomic experience across every device**:
+   - Fluid support for smartphones (320px–480px), foldables, tablets (600px–900px), desktops, and mobile landscape gaming.
 
 ---
 
@@ -55,10 +57,18 @@ Memory matching games traditionally rely on static, nondeterministic card layout
   - `server/services/sessionStore.js`: Thread-safe session persistence with in-memory ring buffer (latest 200 sessions) and asynchronous disk sync to `server/data/sessions.json`.
 - **Frontend Tier (Vanilla HTML5, CSS3, ES6+ JavaScript)**:
   - `public/index.html`: Semantic arcade cabinet interface, live scoreboard, and interactive modals.
-  - `public/css/style.css`: Custom cyber-arcade visual theme with 3D CSS card-flip transforms, holographic borders, and responsive grid layouts.
+  - `public/css/style.css`: Custom cyber-arcade visual theme with 3D CSS card-flip transforms, holographic borders, and multi-tier responsive grid layouts.
   - `public/js/game.js`: Client controller managing card selection invariants, timing, telemetry, and continuous progression.
   - `public/js/audio.js`: Zero-asset procedural sound synthesizer using the native HTML5 Web Audio API (sine, triangle, and sawtooth waves).
   - `public/js/seedClient.js`: Client-side deterministic board generator and offline evaluation fallback.
+
+### Multi-Device Responsive Architecture
+To guarantee smooth gameplay across all screen sizes and orientations without horizontal or vertical cutoffs:
+1. **Dynamic Track Constraints (`minmax(0, 1fr)`)**: Card grids use `repeat(cols, minmax(0, 1fr))` instead of unbounded `1fr`, preventing cards and text strings from exceeding container boundaries in 6×6 mode (Gigachad Galaxy) on narrow mobile screens (320px–390px).
+2. **Fluid Typography & HUD Scaling**: Key HUD stats, arcade buttons, and typography leverage mathematical `clamp()` functions (e.g. `font-size: clamp(0.98rem, 3.2vw, 1.22rem)`), scaling smoothly from ultra-compact smartphones to 4K displays.
+3. **Mobile Touch Target Optimization**: All push buttons and cards enforce minimum 40px–48px tap targets with `touch-action: manipulation;` (eliminating 300ms double-tap browser zoom delays) and `-webkit-tap-highlight-color: transparent;`.
+4. **Mobile Landscape Gaming Mode**: Media query `@media (max-height: 520px) and (orientation: landscape)` automatically compresses the header into a low-profile horizontal HUD, allowing all 4 or 6 rows of cards to be fully playable without continuous scrolling.
+5. **Modal Viewport Bounds**: Overlays enforce `max-height: 90vh; overflow-y: auto;` with horizontally scrollable data tables (`min-width: 440px`), ensuring telemetry and rules never get clipped.
 
 ### Concurrency & State Machine Invariants
 ```
@@ -220,6 +230,70 @@ The repository includes a dedicated `sample_data/` directory providing documente
 | [`sample_data/04_session_maintain_baseline.json`](./sample_data/04_session_maintain_baseline.json) | Baseline Performance Retention (`15-21 moves`, `36-64s`) | 201 Created; Action `MAINTAIN`, Next: `standard` |
 | [`sample_data/05_session_invalid_failure.json`](./sample_data/05_session_invalid_failure.json) | Failure Case: Missing Required Metrics Payload | 400 Bad Request; Descriptive error message |
 | [`sample_data/06_telemetry_analytics.json`](./sample_data/06_telemetry_analytics.json) | Aggregate Telemetry Query | 200 OK; Total rounds, average moves, average time |
+
+### Sample 1: Board Generation (Input & Output)
+**Request:**
+```http
+GET /api/game/new?seed=DOGE-01&difficulty=standard HTTP/1.1
+Host: localhost:3000
+```
+
+**Response (200 OK):**
+```json
+{
+  "seed": "DOGE-01",
+  "difficulty": "standard",
+  "rows": 4,
+  "cols": 4,
+  "totalCards": 16,
+  "totalPairs": 8,
+  "cards": [
+    { "cardId": "c_0", "pairId": "p_doge", "name": "Doge", "imagePath": "/images/memes/doge.jpg", "color": "#f59e0b" },
+    { "cardId": "c_1", "pairId": "p_drake", "name": "Drake Hotline Bling", "imagePath": "/images/memes/drake.jpg", "color": "#00f2fe" }
+  ]
+}
+```
+
+### Sample 2: Session Submission with Explainable Promotion
+**Request:**
+```http
+POST /api/game/session HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "seed": "DOGE-01",
+  "difficulty": "standard",
+  "moves": 12,
+  "pairs": 8,
+  "elapsedSeconds": 28.5,
+  "clientEvents": {
+    "rapidClicksRejected": 1,
+    "duplicateClicksIgnored": 0
+  }
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "adaptation": {
+    "previousDifficulty": "standard",
+    "nextDifficulty": "advanced",
+    "action": "PROMOTE",
+    "ruleId": "RULE_PROMOTION_OVERCLOCK",
+    "reasonSummary": "🏆 GIGACHAD ASCENSION (200 IQ)"
+  },
+  "metrics": {
+    "theoreticalMinMoves": 8,
+    "actualMoves": 12,
+    "pairs": 8,
+    "elapsedSeconds": 28.5,
+    "efficiency": 67
+  }
+}
+```
 
 ---
 

@@ -415,27 +415,28 @@ body {
    ========================================================================== */
 .card-grid {
   display: grid;
-  gap: 1rem;
+  gap: clamp(0.4rem, 1.4vw, 1rem);
   width: 100%;
   margin: 0 auto;
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .card-grid.grid-3x4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   max-width: 660px;
 }
 
 .card-grid.grid-4x4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   max-width: 720px;
 }
 
 .card-grid.grid-6x6 {
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   max-width: 860px;
-  gap: 0.65rem;
+  gap: clamp(0.2rem, 0.8vw, 0.65rem);
 }
 
 /* 3D Card Container */
@@ -445,11 +446,17 @@ body {
   perspective: 1000px;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 0;
   transition: transform var(--transition-fast);
 }
 
-.memory-card.arcade-card:hover:not(.flipped):not(.matched):not(.locked) {
-  transform: translateY(-5px) scale(1.03);
+@media (hover: hover) and (pointer: fine) {
+  .memory-card.arcade-card:hover:not(.flipped):not(.matched):not(.locked) {
+    transform: translateY(-5px) scale(1.03);
+  }
 }
 
 .memory-card.arcade-card:active:not(.flipped):not(.matched):not(.locked) {
@@ -512,31 +519,56 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  gap: clamp(2px, 0.4vw, 0.25rem);
   z-index: 2;
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .card-back-emblem {
-  font-size: 2rem;
+  font-size: clamp(1.1rem, 3.2vw, 2rem);
   filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.8));
   color: var(--neon-cyan);
+  line-height: 1;
 }
 
 .card-back-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: clamp(0.48rem, 1.4vw, 0.72rem);
+  letter-spacing: clamp(0.04em, 0.15vw, 0.12em);
   color: #ffffff;
   text-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .card-back-sub {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: clamp(0.38rem, 1.1vw, 0.55rem);
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* 6x6 specific fine-tuning */
+.grid-6x6 .card-back-emblem {
+  font-size: clamp(0.85rem, 2.4vw, 1.4rem);
+}
+
+.grid-6x6 .card-back-title {
+  font-size: clamp(0.36rem, 1vw, 0.56rem);
+  letter-spacing: 0.02em;
+}
+
+.grid-6x6 .card-back-sub {
+  font-size: clamp(0.32rem, 0.8vw, 0.45rem);
 }
 
 /* ==========================================================================
@@ -595,8 +627,8 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 0.45rem 0.35rem 0.3rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+  padding: clamp(0.18rem, 0.5vw, 0.45rem) clamp(0.12rem, 0.4vw, 0.35rem) clamp(0.12rem, 0.35vw, 0.3rem);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.65) 60%, transparent 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -606,18 +638,18 @@ body {
 
 .card-photo-title {
   font-family: var(--font-display);
-  font-size: 0.76rem;
+  font-size: clamp(0.52rem, 1.4vw, 0.76rem);
   font-weight: 800;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 95%;
+  max-width: 96%;
 }
 
 .grid-6x6 .card-photo-title {
-  font-size: 0.58rem;
+  font-size: clamp(0.38rem, 1vw, 0.58rem);
 }
 
 /* Matched Card State: Golden Victory Shimmer */
@@ -752,7 +784,9 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-smooth);
-  padding: 1.5rem;
+  padding: clamp(0.75rem, 2.5vw, 1.5rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-overlay.active {
@@ -765,12 +799,15 @@ body {
   border: 3px solid #5b3096;
   border-radius: var(--radius-lg);
   width: 100%;
-  max-width: 620px;
-  padding: 1.75rem;
+  max-width: min(640px, 95vw);
+  max-height: min(90vh, 720px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(1.1rem, 3.5vw, 1.75rem);
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(168, 85, 247, 0.3);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: clamp(0.85rem, 2.5vw, 1.25rem);
   animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   color: #f8fafc;
 }
@@ -883,8 +920,10 @@ body {
 
 /* Table styling for Rules and Telemetry */
 .table-wrapper {
-  max-height: 260px;
+  max-height: 280px;
   overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
 }
@@ -893,6 +932,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
+  min-width: 440px;
 }
 
 .data-table th,
@@ -936,8 +976,10 @@ body {
   border: 2px solid rgba(168, 85, 247, 0.5);
   border-radius: 20px;
   width: 100%;
-  max-width: 420px;
-  padding: 2.2rem 2rem 1.8rem;
+  max-width: min(420px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: clamp(1.4rem, 4vw, 2.2rem) clamp(1.1rem, 3.5vw, 2rem) clamp(1.2rem, 3.5vw, 1.8rem);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(168, 85, 247, 0.35);
   display: flex;
   flex-direction: column;
@@ -954,8 +996,8 @@ body {
 
 .match-popup-close-btn {
   position: absolute;
-  top: 14px;
-  right: 18px;
+  top: 12px;
+  right: 14px;
   background: none;
   border: none;
   font-size: 1.75rem;
@@ -972,20 +1014,20 @@ body {
 
 .match-photo-frame {
   display: inline-block;
-  padding: 6px;
+  padding: clamp(4px, 1.2vw, 6px);
   background: #ec4899;
-  outline: 3.5px solid #ffffff;
-  border-radius: 16px;
+  outline: clamp(2.5px, 0.8vw, 3.5px) solid #ffffff;
+  border-radius: clamp(12px, 3vw, 16px);
   box-shadow: 0 8px 25px rgba(236, 72, 153, 0.45);
-  margin-bottom: 1.35rem;
+  margin-bottom: clamp(0.75rem, 2.5vw, 1.35rem);
 }
 
 #match-popup-img {
-  width: 175px;
-  height: 175px;
+  width: clamp(110px, 28vw, 175px);
+  height: clamp(110px, 28vw, 175px);
   object-fit: cover;
   display: block;
-  border-radius: 12px;
+  border-radius: clamp(8px, 2.5vw, 12px);
 }
 
 .match-popup-body {
@@ -997,7 +1039,7 @@ body {
 .match-popup-heading {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.22rem;
+  font-size: clamp(0.98rem, 3.2vw, 1.22rem);
   color: #fde047;
   line-height: 1.35;
   text-shadow: 0 2px 10px rgba(253, 224, 71, 0.4);
@@ -1005,7 +1047,7 @@ body {
 
 .match-popup-subtitle {
   font-family: var(--font-display);
-  font-size: 0.92rem;
+  font-size: clamp(0.82rem, 2.5vw, 0.92rem);
   color: #c4b5fd;
   font-style: italic;
   font-weight: 600;
@@ -1039,8 +1081,10 @@ body {
   border: 3px solid var(--neon-cyan);
   border-radius: 24px;
   width: 100%;
-  max-width: 520px;
-  padding: 2.5rem 2.2rem 2.2rem;
+  max-width: min(520px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: clamp(1.4rem, 4vw, 2.5rem) clamp(1.1rem, 3.5vw, 2.2rem) clamp(1.2rem, 3.5vw, 2.2rem);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 242, 254, 0.35);
   display: flex;
   flex-direction: column;
@@ -1061,7 +1105,7 @@ body {
   color: #ffffff;
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 0.76rem;
+  font-size: clamp(0.68rem, 1.8vw, 0.76rem);
   letter-spacing: 0.14em;
   padding: 0.35rem 1.1rem;
   border-radius: 9999px;
@@ -1072,7 +1116,7 @@ body {
 .level-transition-title {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 2.1rem;
+  font-size: clamp(1.35rem, 5vw, 2.1rem);
   background: linear-gradient(135deg, #ffffff 0%, #fef08a 45%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1082,36 +1126,36 @@ body {
 
 .level-transition-subtitle {
   color: #cbd5e1;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  font-size: clamp(0.82rem, 2.5vw, 0.95rem);
+  margin-bottom: 1.25rem;
   line-height: 1.45;
 }
 
 .level-transition-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+  gap: clamp(0.4rem, 1.8vw, 0.75rem);
   width: 100%;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .level-stat-box {
   background: #100826;
   border: 1px solid rgba(168, 85, 247, 0.3);
   border-radius: var(--radius-sm);
-  padding: 0.75rem 0.5rem;
+  padding: clamp(0.45rem, 1.5vw, 0.75rem) 0.35rem;
 }
 
 .level-stat-box span {
   font-family: var(--font-mono);
-  font-size: 1.35rem;
+  font-size: clamp(1.05rem, 3.8vw, 1.35rem);
   font-weight: 800;
   color: var(--neon-cyan);
   display: block;
 }
 
 .level-stat-box small {
-  font-size: 0.65rem;
+  font-size: clamp(0.55rem, 1.6vw, 0.65rem);
   color: #94a3b8;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -1136,34 +1180,480 @@ body {
 
 .level-countdown-text {
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: clamp(0.76rem, 2.2vw, 0.88rem);
   color: #94a3b8;
   margin-bottom: 1.25rem;
 }
 
 .level-continue-btn {
   width: 100%;
-  font-size: 1.05rem;
-  padding: 0.85rem 1.5rem;
+  font-size: clamp(0.92rem, 2.8vw, 1.05rem);
+  padding: clamp(0.65rem, 2vw, 0.85rem) 1.25rem;
 }
 
 /* ==========================================================================
-   Responsive Adaptations
+   Comprehensive Multi-Device Responsive Design System
+   Breakpoints: 992px (Tablet Land), 768px (Tablet Port), 580px (Mobile Port), 380px (Compact Mobile), Landscape
    ========================================================================== */
+
+/* --- TABLETS & MEDIUM VIEWPORTS (max-width: 900px) --- */
+@media (max-width: 900px) {
+  .arcade-top-nav {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .arcade-stage-container {
+    width: 96%;
+    margin-bottom: 2rem;
+  }
+
+  .card-grid {
+    gap: 0.75rem;
+  }
+
+  .card-grid.grid-6x6 {
+    gap: 0.45rem;
+  }
+}
+
+/* --- SMALL TABLETS & LARGE MOBILE (max-width: 768px) --- */
 @media (max-width: 768px) {
   .arcade-top-nav {
     flex-direction: column;
     align-items: stretch;
+    padding: 0.85rem 1rem 0.65rem;
     gap: 0.75rem;
   }
+
   .top-nav-left {
     justify-content: center;
-    flex-wrap: wrap;
+    gap: clamp(0.45rem, 1.8vw, 0.75rem);
+    width: 100%;
   }
+
+  .top-nav-right {
+    width: 100%;
+  }
+
   .arcade-scoreboard-banner {
-    justify-content: center;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr 1fr;
   }
+
+  .banner-unit {
+    min-width: 0;
+    padding: 0.45rem 0.35rem;
+  }
+
+  .arcade-stage-container {
+    width: calc(100% - 1.25rem);
+    margin: 0 auto 1.75rem;
+  }
+
+  .marquee-sign {
+    padding: 0.75rem 1rem 0.5rem;
+    border-width: 3px;
+  }
+
+  .arcade-cabinet-body {
+    border-width: 3px;
+    padding: 1.15rem 0.75rem;
+  }
+
+  .arcade-control-deck {
+    border-width: 3px;
+    padding: 0.75rem 1rem;
+  }
+
   .card-grid {
+    gap: 0.65rem;
+  }
+
+  .card-grid.grid-6x6 {
+    gap: 0.35rem;
+  }
+}
+
+/* --- STANDARD MOBILE SCREENS (max-width: 580px) --- */
+@media (max-width: 580px) {
+  .arcade-top-nav {
+    padding: 0.65rem 0.65rem 0.45rem;
     gap: 0.55rem;
+  }
+
+  .top-nav-left {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.25rem;
+  }
+
+  .btn-arcade-round {
+    width: clamp(38px, 11vw, 44px);
+    height: clamp(38px, 11vw, 44px);
+    border-width: 1.5px;
+  }
+
+  .btn-arcade-round svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-arcade-round span {
+    font-size: 1.1rem !important;
+  }
+
+  .arcade-scoreboard-banner {
+    border-radius: var(--radius-sm);
+  }
+
+  .banner-unit {
+    padding: 0.35rem 0.2rem;
+  }
+
+  .banner-unit span {
+    font-size: 0.88rem;
+  }
+
+  .banner-unit small {
+    font-size: 0.52rem;
+    letter-spacing: 0.02em;
+  }
+
+  .banner-unit.brand span {
+    font-size: 0.78rem;
+  }
+
+  .marquee-sign {
+    padding: 0.55rem 0.65rem 0.4rem;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .marquee-title {
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+  }
+
+  .marquee-bulbs {
+    width: 10px;
+    height: 10px;
+  }
+
+  .arcade-digital-clock-pill {
+    margin-top: -4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .clock-box {
+    padding: 0.25rem 0.65rem;
+    min-width: 70px;
+  }
+
+  .clock-box span {
+    font-size: 1rem;
+  }
+
+  .clock-box small {
+    font-size: 0.52rem;
+  }
+
+  .arcade-cabinet-body {
+    padding: 0.75rem 0.4rem;
+  }
+
+  .card-grid {
+    gap: 0.45rem;
+  }
+
+  .card-grid.grid-6x6 {
+    gap: 0.25rem;
+  }
+
+  .arcade-control-deck {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.65rem 0.65rem;
+    gap: 0.55rem;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  .deck-item {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .arcade-select {
+    flex: 1;
+    max-width: 65%;
+    font-size: 0.76rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .arcade-seed-box {
+    flex: 1;
+    max-width: 65%;
+  }
+
+  .arcade-seed-input {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.76rem;
+  }
+
+  .btn-arcade-seed {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+  }
+
+  /* Modals on Mobile */
+  .modal-overlay {
+    padding: 0.65rem;
+  }
+
+  .modal-content {
+    padding: 1.15rem 1rem;
+    gap: 0.85rem;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-title {
+    font-size: 1.15rem;
+  }
+
+  .modal-stats-grid {
+    gap: 0.5rem;
+  }
+
+  .modal-stat-pill {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .modal-stat-val {
+    font-size: 1.1rem;
+  }
+
+  .modal-stat-lbl {
+    font-size: 0.6rem;
+  }
+
+  .data-table {
+    font-size: 0.72rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.4rem 0.5rem;
+  }
+}
+
+/* --- COMPACT PHONES / FOLDABLE EXTERNAL SCREENS (max-width: 360px) --- */
+@media (max-width: 360px) {
+  .arcade-top-nav {
+    padding: 0.4rem 0.35rem 0.3rem;
+  }
+
+  .btn-arcade-round {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-arcade-round svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .arcade-scoreboard-banner {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .banner-unit:nth-child(2) {
+    border-right: none;
+  }
+
+  .banner-unit:nth-child(1),
+  .banner-unit:nth-child(2) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .marquee-title {
+    font-size: 0.95rem;
+  }
+
+  .card-grid {
+    gap: 0.3rem;
+  }
+
+  .card-grid.grid-6x6 {
+    gap: 2px;
+  }
+
+  .grid-6x6 .card-face.back.arcade-back-face::before {
+    display: none;
+  }
+
+  .grid-6x6 .card-face.front.arcade-front-face {
+    border-width: 1.5px;
+  }
+
+  .grid-6x6 .card-back-sub {
+    display: none;
+  }
+}
+
+/* --- MOBILE LANDSCAPE MODE (orientation: landscape and max-height: 520px) --- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .arcade-top-nav {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.35rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .top-nav-left {
+    gap: 0.45rem;
+    width: auto;
+    flex-wrap: nowrap;
+  }
+
+  .top-nav-right {
+    width: auto;
+  }
+
+  .btn-arcade-round {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-arcade-round svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .arcade-scoreboard-banner {
+    display: flex;
+    width: auto;
+  }
+
+  .banner-unit {
+    padding: 0.25rem 0.6rem;
+    min-width: 50px;
+  }
+
+  .banner-unit span {
+    font-size: 0.85rem;
+  }
+
+  .arcade-stage-container {
+    margin: 0 auto 1rem;
+    max-width: 900px;
+    width: 96%;
+  }
+
+  .marquee-sign {
+    padding: 0.35rem 0.85rem;
+  }
+
+  .marquee-title {
+    font-size: 1.05rem;
+  }
+
+  .arcade-digital-clock-pill {
+    margin-top: -2px;
+  }
+
+  .clock-box {
+    padding: 0.2rem 0.6rem;
+    min-width: 60px;
+  }
+
+  .clock-box span {
+    font-size: 0.95rem;
+  }
+
+  .arcade-cabinet-body {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .card-grid {
+    gap: 0.45rem;
+    max-width: 600px;
+  }
+
+  .card-grid.grid-6x6 {
+    gap: 0.3rem;
+    max-width: 680px;
+  }
+
+  .arcade-control-deck {
+    flex-direction: row;
+    padding: 0.4rem 0.75rem;
+  }
+
+  /* Modals in landscape: horizontal layout to prevent overflowing short viewports */
+  .match-popup-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    max-width: 540px;
+    text-align: left;
+  }
+
+  .match-photo-frame {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  #match-popup-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .match-popup-heading {
+    font-size: 1.05rem;
+  }
+
+  .modal-content {
+    max-height: 88vh;
+    padding: 1rem 1.25rem;
+  }
+
+  .level-transition-card {
+    padding: 1.25rem 1.5rem;
+    max-width: 560px;
+  }
+
+  .level-transition-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .level-transition-subtitle {
+    margin-bottom: 0.75rem;
+  }
+
+  .level-transition-stats {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* --- ACCESSIBILITY: REDUCED MOTION --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .scene-aurora-glow,
+  .particle,
+  .marquee-bulbs {
+    animation: none !important;
   }
 }
