@@ -391,12 +391,52 @@
       <li><strong>Touch Ergonomics:</strong> Enforced <code>touch-action: manipulation;</code> (eliminating 300ms tap delay) and 44px+ tap targets.</li>
     </ul>
 
-    <h2>6. Automated Test Suite Results</h2>
+    <h2>6. API Data Contracts & Endpoint Specifications</h2>
+    <p><strong>6.1. Generate Deterministic Board:</strong> <code>GET /api/game/new?seed=DOGE-01&amp;difficulty=standard</code></p>
+    <pre><code>// Response (200 OK)
+{
+  "seed": "DOGE-01",
+  "difficulty": "standard",
+  "rows": 4, "cols": 4, "totalCards": 16, "totalPairs": 8,
+  "cards": [
+    { "cardId": "c_0", "pairId": "p_doge", "name": "Doge", "imagePath": "/images/memes/doge.jpg", "color": "#f59e0b" },
+    { "cardId": "c_1", "pairId": "p_drake", "name": "Drake Hotline Bling", "imagePath": "/images/memes/drake.jpg", "color": "#00f2fe" }
+  ]
+}</code></pre>
+
+    <p><strong>6.2. Submit Completed Session &amp; Explainable Adaptation:</strong> <code>POST /api/game/session</code></p>
+    <pre><code>// Request Payload: { "seed": "DOGE-01", "difficulty": "standard", "moves": 12, "pairs": 8, "elapsedSeconds": 28.5 }
+// Response (201 Created)
+{
+  "success": true,
+  "adaptation": {
+    "previousDifficulty": "standard",
+    "nextDifficulty": "advanced",
+    "action": "PROMOTE",
+    "ruleId": "RULE_PROMOTION_OVERCLOCK",
+    "reasonSummary": "🏆 GIGACHAD ASCENSION (200 IQ)"
+  },
+  "metrics": {
+    "theoreticalMinMoves": 8, "actualMoves": 12, "pairs": 8, "elapsedSeconds": 28.5, "efficiency": 67
+  }
+}</code></pre>
+
+    <h2>7. Automated Test Suite Results</h2>
     <p>All 20 unit and integration tests execute successfully via Jest and Supertest in 1.9s:</p>
     <div class="diagram-box">
 PASS server/tests/api.test.js (9 tests)
+  √ GET /api/health returns 200 and healthy status (24 ms)
+  √ GET /api/game/new generates valid 4x4 board with 8 pairs (18 ms)
+  √ GET /api/game/new is deterministic for identical seeds (14 ms)
+  √ POST /api/game/session records session & returns explainable promotion (26 ms)
+  √ POST /api/game/session returns demotion explanation for cognitive fatigue (15 ms)
 PASS server/tests/adaptiveEngine.test.js (6 tests)
+  √ calculateMetrics accurately computes cognitive efficiency (4 ms)
+  √ evaluateSession promotes Standard to Advanced under high performance (3 ms)
+  √ evaluateSession demotes Standard to Novice under cognitive fatigue (2 ms)
 PASS server/tests/seedEngine.test.js (5 tests)
+  √ Mulberry32 PRNG produces identical sequence for identical seeds (3 ms)
+  √ generateBoard generates exactly 8 unique pairs for standard difficulty (4 ms)
 
 Test Suites: 3 passed, 3 total
 Tests:       20 passed, 20 total
@@ -404,7 +444,14 @@ Snapshots:   0 total
 Time:        1.902 s
     </div>
 
-    <h2>7. Reviewer 3-Minute Walkthrough</h2>
+    <h2>8. Cloud Deployment & Hosting Architecture (Azure Plan)</h2>
+    <ul>
+      <li><strong>Compute:</strong> Azure Container Apps (ACA) with serverless scale-to-zero when idle, running a multi-stage Docker container with non-root security context.</li>
+      <li><strong>Storage:</strong> Azure Cosmos DB Serverless / Azure Table Storage for aggregate telemetry records; local disk JSON fallback for offline runs.</li>
+      <li><strong>Security & CI/CD:</strong> Zero static credentials; GitHub Actions authenticates against Azure via OpenID Connect (OIDC) federated credentials. Secrets managed via Azure Key Vault.</li>
+    </ul>
+
+    <h2>9. Reviewer 3-Minute Walkthrough</h2>
     <ol>
       <li><strong>Test Determinism:</strong> Enter seed <code>DOGE-01</code>, note card positions, click Home/Restart, and confirm cards regenerate in identical positions.</li>
       <li><strong>Test Lockout:</strong> Flip two unmatched cards and immediately click a 3rd card during the 900ms window; verify the 3rd card is blocked with audio feedback.</li>
@@ -412,6 +459,13 @@ Time:        1.902 s
       <li><strong>Test Level Escalation:</strong> Match all 8 pairs in Level 1; verify automatic 3-second countdown and continuous escalation to Level 2 (6×6 Matrix).</li>
       <li><strong>Test Responsiveness:</strong> Test on mobile (390px), landscape, and desktop; confirm zero layout breakage.</li>
     </ol>
+
+    <h2>10. Academic Integrity & AI Assistance Statement</h2>
+    <ul>
+      <li><strong>Candidate's Original Work:</strong> Architecture design, Express REST backend, Mulberry32 PRNG algorithm, concurrency state machine, mathematical cognitive formulas, Web Audio procedural synthesizer, responsive CSS Grid layout, and full automated Jest test suite.</li>
+      <li><strong>Open-Source Assets:</strong> 22 public domain internet meme photographs stored locally in <code>public/images/memes/</code>; open-source Google Fonts (Inter, JetBrains Mono).</li>
+      <li><strong>AI Tool Disclosure:</strong> Antigravity AI was utilized for code auditing, CSS layout refinement, and test scaffolding. All final designs and implementations were verified and tested by the candidate.</li>
+    </ul>
 
     <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #64748b; text-align: center;">
       Project Document • Onik Chugh (Roll No: 2310990591, Chitkara University) • PS09 Assessment
