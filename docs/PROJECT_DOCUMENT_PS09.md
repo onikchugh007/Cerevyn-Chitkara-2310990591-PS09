@@ -13,7 +13,7 @@
 | **University Roll Number** | **2310990591** |
 | **Academic Department** | **Computer Science and Engineering (CSE)** |
 | **Institution** | **Chitkara University** |
-| **GitHub Repository** | [https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09](https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09) |
+| **GitHub Repository** | [https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09](https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09) |
 | **Evaluated Release Tag** | `v1.1.0` (Multi-Device Responsive Release) |
 | **Deployment Architecture** | Azure App Service / Container Apps & Docker |
 
@@ -399,7 +399,7 @@ All configurations are managed through credential-free defaults and injected sec
 
 # 12. GitHub Repository & Submission Details
 
-- **Official Repository URL**: [https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09](https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09)
+- **Official Repository URL**: [https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09](https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09)
 - **Evaluated Release Tag**: `v1.1.0`
 - **Candidate Name**: Onik Chugh
 - **Roll Number**: 2310990591

@@ -13,9 +13,9 @@
 | **Institution** | **Chitkara University** |
 | **Problem Statement ID** | **Problem Statement 09 (PS09)** |
 | **Project Title** | Adaptive Memory Matching Game (Synapse Engine / MEMEMIND) |
-| **Repository Name** | `Cerevyn-Chitkara-210990591-PS09` |
+| **Repository Name** | `Cerevyn-Chitkara-2310990591-PS09` |
 | **Evaluated Release Tag** | `v1.1.0` (Multi-Device Responsive Release) |
-| **CI / CD Pipeline Status** | ![CI](https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09/actions/workflows/ci.yml/badge.svg) |
+| **CI / CD Pipeline Status** | ![CI](https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09/actions/workflows/ci.yml/badge.svg) |
 
 ---
 
@@ -135,8 +135,8 @@ To guarantee smooth gameplay across all screen sizes and orientations without ho
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09.git
-cd Cerevyn-Chitkara-210990591-PS09
+git clone https://github.com/onikchugh007/Cerevyn-Chitkara-2310990591-PS09.git
+cd Cerevyn-Chitkara-2310990591-PS09
 ```
 
 ### Step 2: Environment Configuration
