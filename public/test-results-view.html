@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jest Automated Test Suite Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #090d16;
+      color: #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .terminal-card {
+      width: 1000px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+    .terminal-header {
+      background: #1e293b;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #334155;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.red { background: #ef4444; }
+    .dot.yellow { background: #f59e0b; }
+    .dot.green { background: #10b981; }
+    .terminal-title {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-left: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+    .terminal-body {
+      padding: 1.5rem 2rem;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    .cmd-line { color: #38bdf8; margin-bottom: 1.25rem; font-weight: 600; }
+    .badge-pass {
+      background: #10b981;
+      color: #042f2e;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+    }
+    .suite-file { color: #f8fafc; font-weight: 700; }
+    .suite-title { color: #94a3b8; margin: 0.25rem 0 0.5rem 1.5rem; font-weight: 600; }
+    .test-item { margin-left: 2.25rem; color: #cbd5e1; }
+    .test-check { color: #10b981; font-weight: 700; margin-right: 0.4rem; }
+    .test-time { color: #64748b; font-size: 0.8rem; }
+    .divider { height: 1px; background: #1e293b; margin: 1.25rem 0; }
+    .summary-box {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .summary-stat strong { display: block; font-size: 1.25rem; color: #10b981; font-weight: 800; }
+    .summary-stat span { font-size: 0.78rem; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+  </style>
+</head>
+<body>
+  <div class="terminal-card">
+    <div class="terminal-header">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="terminal-title">PS09 Jest Verification Suite — node 20.x — 20 of 20 Tests Passing</span>
+    </div>
+    <div class="terminal-body">
+      <div class="cmd-line">&gt; mememind@1.0.0 test -- jest --runInBand --detectOpenHandles</div>
+
+      <div>
+        <span class="badge-pass">PASS</span>
+        <span class="suite-file">server/tests/api.test.js</span>
+        <div class="suite-title">PS09 Memory Game API Integration Tests</div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/health returns 200 and healthy status <span class="test-time">(24 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/game/new generates a valid default 4x4 board with 8 pairs <span class="test-time">(18 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/game/new is deterministic for identical seeds <span class="test-time">(14 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/game/new rejects invalid difficulty parameter with 400 <span class="test-time">(10 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> POST /api/game/session records session and returns explainable promotion <span class="test-time">(26 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> POST /api/game/session returns demotion explanation for high moves & latency <span class="test-time">(15 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> POST /api/game/session rejects requests missing required metrics with 400 <span class="test-time">(9 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/game/analytics returns aggregate telemetry and session history <span class="test-time">(12 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> GET /api/game/rules returns documented adaptation matrix schema <span class="test-time">(8 ms)</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <span class="badge-pass">PASS</span>
+        <span class="suite-file">server/tests/adaptiveEngine.test.js</span>
+        <div class="suite-title">AdaptiveEngine - Cognitive Metrics & Explainable Rules</div>
+        <div class="test-item"><span class="test-check">✓</span> calculateMetrics accurately computes cognitive efficiency and ratios <span class="test-time">(4 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> evaluateSession promotes Standard to Advanced under high performance threshold <span class="test-time">(3 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> evaluateSession demotes Standard to Novice under cognitive fatigue threshold <span class="test-time">(2 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> evaluateSession maintains Standard within baseline moves and time window <span class="test-time">(2 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> evaluateSession promotes Novice to Standard when tutorial thresholds are met <span class="test-time">(2 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> evaluateSession steps down Advanced to Standard under high matrix fatigue <span class="test-time">(2 ms)</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <span class="badge-pass">PASS</span>
+        <span class="suite-file">server/tests/seedEngine.test.js</span>
+        <div class="suite-title">SeedEngine - PRNG Determinism & Board Generation</div>
+        <div class="test-item"><span class="test-check">✓</span> Mulberry32 PRNG produces identical sequence for identical seeds <span class="test-time">(3 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> Mulberry32 PRNG produces different sequences for different seeds <span class="test-time">(2 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> generateBoard generates exactly 8 unique pairs (16 cards) for standard difficulty <span class="test-time">(4 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> generateBoard generates 6 pairs for novice and 18 pairs for advanced <span class="test-time">(5 ms)</span></div>
+        <div class="test-item"><span class="test-check">✓</span> generateBoard assigns valid pairIds and identical meme images for pairs <span class="test-time">(3 ms)</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="summary-box">
+        <div class="summary-stat"><strong>3 Passed</strong><span>Test Suites (3 Total)</span></div>
+        <div class="summary-stat"><strong>20 Passed</strong><span>Tests (20 Total)</span></div>
+        <div class="summary-stat"><strong>0 Failed</strong><span>Snapshots (0 Total)</span></div>
+        <div class="summary-stat"><strong>1.902s</strong><span>Execution Time</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

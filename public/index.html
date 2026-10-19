@@ -32,14 +32,17 @@
     <div class="top-nav-left">
       <!-- 🔴 Home / Restart Button -->
       <button id="btn-restart-round" class="btn-arcade-round red" title="Home / Restart Game">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
       </button>
 
       <!-- 🔊 Sound Button -->
       <button id="btn-sound-round" class="btn-arcade-round amber" title="Sound Volume">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
           <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
@@ -48,7 +51,8 @@
 
       <!-- 👁️ Peek Button -->
       <button id="btn-peek-round" class="btn-arcade-round cyan" title="Peek All Cards (3s)">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
           <circle cx="12" cy="12" r="3"></circle>
         </svg>
@@ -140,7 +144,8 @@
       <div class="deck-item">
         <label for="seed-input">Seed:</label>
         <div class="arcade-seed-box">
-          <input type="text" id="seed-input" class="arcade-seed-input" value="DOGE-01" spellcheck="false" placeholder="SEED">
+          <input type="text" id="seed-input" class="arcade-seed-input" value="DOGE-01" spellcheck="false"
+            placeholder="SEED">
           <button id="btn-new-seed" class="btn-arcade-seed" title="New Random Seed">⚡ Seed</button>
         </div>
       </div>
@@ -152,7 +157,7 @@
   <div id="match-popup-modal" class="match-popup-overlay">
     <div class="match-popup-card" id="match-popup-card">
       <button class="match-popup-close-btn" id="btn-close-match-popup" title="Close">&times;</button>
-      
+
       <div class="match-photo-frame">
         <img id="match-popup-img" src="" alt="Matched Meme" />
       </div>
@@ -242,7 +247,8 @@
           </span>
           <span id="modal-adapt-action-badge" class="evaluator-badge">PROMOTED</span>
         </div>
-        <h3 id="modal-adapt-title" style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem; color: #6ee7b7;">
+        <h3 id="modal-adapt-title"
+          style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem; color: #6ee7b7;">
           Next Difficulty Level
         </h3>
         <p id="modal-adapt-reason" style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.45;">
@@ -311,15 +317,14 @@
         </table>
       </div>
 
-      <div style="background: #110a26; padding: 0.85rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1);">
+      <div
+        style="background: #110a26; padding: 0.85rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1);">
         <strong>Meme IQ Formula:</strong> <code>Cognitive Efficiency (%) = (Total Pairs / Moves) &times; 100</code>.<br>
-        <strong>Safety Invariant:</strong> Third clicks are blocked during comparison. Restart cleanly aborts pending timers.
+        <strong>Safety Invariant:</strong> Third clicks are blocked during comparison. Restart cleanly aborts pending
+        timers.
       </div>
 
-      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
-        <a href="/docs/PROJECT_DOCUMENT_PS09.html" target="_blank" class="btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; color: #ffffff;">
-          📄 Project Document (PDF) ↗
-        </a>
+      <div style="display: flex; justify-content: flex-end;">
         <button class="btn-primary" onclick="document.getElementById('rules-modal').classList.remove('active')">
           Close Rules
         </button>
@@ -370,7 +375,8 @@
           </thead>
           <tbody id="analytics-table-body">
             <tr>
-              <td colspan="6" style="text-align: center; color: #94a3b8;">No session records yet. Complete a round to generate telemetry!</td>
+              <td colspan="6" style="text-align: center; color: #94a3b8;">No session records yet. Complete a round to
+                generate telemetry!</td>
             </tr>
           </tbody>
         </table>
