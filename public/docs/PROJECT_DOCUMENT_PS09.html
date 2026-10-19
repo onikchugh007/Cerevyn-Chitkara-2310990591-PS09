@@ -546,7 +546,7 @@
       <ul>
         <li><strong>Frontend Client:</strong> Handles 3D card flips, locks inputs during mismatch comparisons, and produces synthetic sound waves.</li>
         <li><strong>Node.js Express API:</strong> Serves deterministic boards, records completed sessions, and outputs explainable progression recommendations.</li>
-        <li><strong>Seed Engine:</strong> Employs FNV-1a hashing and Mulberry32 PRNG to deliver statistically uniform card permutations.</li>
+        <li><strong>Seed Engine:</strong> Converts alphanumeric seeds to a 32-bit unsigned integer via a bitwise multiplier hash (constant multiplier <code>3432918353</code> with bitwise rotate-13), then initializes the deterministic <strong>Mulberry32 PRNG</strong> to drive unbiased Fisher-Yates array shuffling.</li>
         <li><strong>Adaptive Engine:</strong> Evaluates moves and elapsed seconds against cognitive thresholds.</li>
         <li><strong>Session Store:</strong> Thread-safe ring buffer persisting telemetry asynchronously to local JSON storage.</li>
       </ul>
@@ -716,8 +716,14 @@
     <!-- ========================================== -->
     <div style="margin-top: 2rem;">
       <h2><span class="sec-num">09</span> Automated Testing &amp; Verification Suite</h2>
-      <p>The repository includes <strong>20 automated unit and integration tests</strong> across 3 test suites, executing in under 2 seconds via Jest and Supertest:</p>
+      <p>The repository includes <strong>24 automated unit and integration tests</strong> across 4 test suites, executing in under 2.5 seconds via Jest and Supertest:</p>
       <div class="diagram-box">
+PASS server/tests/concurrencyRestart.test.js (4 tests)
+  √ FLIP A -> FLIP B (MISMATCH) -> RESTART IMMEDIATELY -> ADVANCE TIMERS -> NEW BOARD UNCHANGED (18 ms)
+  √ Restart immediately clears pending peekAll() timer and leaves new board intact (12 ms)
+  √ Restart immediately clears pending final-win transition timer (14 ms)
+  √ triggerLevelTransitionAnimation strictly uses adaptation.nextDifficulty as single source of truth (8 ms)
+
 PASS server/tests/api.test.js (9 tests)
   √ GET /api/health returns 200 and healthy status (24 ms)
   √ GET /api/game/new generates valid 4x4 board with 8 pairs (18 ms)
@@ -744,7 +750,7 @@ PASS server/tests/seedEngine.test.js (5 tests)
   √ generateBoard generates 6 pairs for novice and 18 pairs for advanced (5 ms)
   √ generateBoard assigns valid pairIds and identical meme images for pairs (3 ms)
 
-Test Suites: 3 passed, 3 total | Tests: 20 passed, 20 total | Snapshots: 0 | Time: 1.902 s
+Test Suites: 4 passed, 4 total | Tests: 24 passed, 24 total | Snapshots: 0 | Time: 2.345 s
       </div>
     </div>
 

@@ -49,11 +49,11 @@ Conventional browser-based memory matching games suffer from several fundamental
 The core engineering objectives of MEMEMIND are:
 
 1. **Adaptive Difficulty Scaling**: Continuously evaluate cognitive metrics to adjust the board size (Novice 3×4, Standard 4×4, Advanced 6×6) based on working memory efficiency.
-2. **Deterministic Seed-Based Permutation**: Implement a cryptographically inspired, 32-bit PRNG (Mulberry32) combined with Fisher-Yates array shuffling to ensure 100% reproducible card layouts from any alphanumeric seed.
+2. **Deterministic Seed-Based Permutation**: Implement a 32-bit MurmurHash3 / cyrb32 bitwise multiplier hash combined with the Mulberry32 PRNG and Fisher-Yates array shuffling to ensure 100% reproducible card layouts from any alphanumeric seed.
 3. **High-Precision Telemetry Tracking**: Track pair resolution moves, match accuracy, and active milliseconds using the Page Visibility API to pause time on tab blur.
 4. **Explainable Cognitive Efficiency Metric**: Formulate an objective efficiency ratio:
    $$\text{Efficiency} = \left(\frac{\text{Theoretical Minimum Moves}}{\text{Actual Moves Recorded}}\right) \times 100\%$$
-5. **Robust Concurrency & Restart Safety**: Enforce an unbreachable state machine lock (`isResolvingPair = true`) during mismatch resolution and cancel all active timers (`clearTimeout()`) synchronously on restart.
+5. **Robust Concurrency & Restart Safety**: Enforce an unbreachable state machine lock (`isResolvingPair = true`) during mismatch resolution and cancel all active timers (`clearTimeout()`) synchronously on restart via `clearAllPendingTimers()`.
 6. **Universal Multi-Device Ergonomics**: Provide a responsive interface utilizing fluid CSS grid constraints (`minmax(0, 1fr)`), 44px+ touch targets, and mobile landscape adaptations.
 
 ---
@@ -64,11 +64,11 @@ The core engineering objectives of MEMEMIND are:
 | :--- | :--- | :--- | :--- |
 | **Frontend Structure** | HTML5 Semantic Elements | Modern Web Standard | Semantic arcade cabinet HUD, accessibility dialogs, and SVG icons |
 | **Frontend Styling** | Vanilla CSS3 (Custom Tokens) | CSS Grid / Flexbox | Viewport-constrained fluid layouts, 3D card flips, zero bulky UI dependencies |
-| **Frontend Logic** | ES6+ Modular JavaScript | Native Browser ES6 | State machine controller, event delegation, and procedural audio synthesis |
+| **Frontend Logic** | ES6+ Modular JavaScript | Native Browser ES6 | State machine controller, input concurrency locks, and Web Audio procedural synthesizer |
 | **Audio Engine** | HTML5 Web Audio API | Built-in AudioContext | Zero-asset synthetic sounds (sine/triangle frequencies) with volume persistence |
 | **Backend Framework** | Node.js & Express | Node 20 LTS / Express 5 | Lightweight REST API routes, PRNG calculations, and static file delivery |
-| **PRNG Algorithm** | Mulberry32 + FNV-1a Hash | 32-bit Integer PRNG | Uniform, deterministic random board distribution from string seeds |
-| **Testing Framework** | Jest & Supertest | Jest 30.5 / Supertest 7.3 | 20 unit and integration tests covering API routes, rules, and seeds |
+| **PRNG Algorithm** | Mulberry32 PRNG | 32-bit PRNG | Uniform, deterministic random board distribution from string seeds |
+| **Testing Framework** | Jest & Supertest | Jest 30.5 / Supertest 7.3 | 24 unit and integration tests across 4 test suites covering API, rules, seeds, and concurrency restart invariants |
 | **Containerization** | Docker | Multi-Stage Alpine | Lightweight, reproducible container with non-root security context |
 | **CI / CD Pipeline** | GitHub Actions | `ci.yml` Workflow | Automated dependency installation, test execution, and security audit |
 | **Cloud Hosting** | Azure App Service / ACA | Linux Node 20 LTS | Scalable cloud hosting plan with serverless scale-to-zero and HTTPS |
@@ -119,10 +119,10 @@ The project follows a decoupled, three-tier client-server architecture:
 2. **Backend API (`server/routes/api.js`)**:
    - Exposes REST endpoints for board creation, session evaluation, and telemetry analytics.
 3. **Seed Engine (`server/services/seedEngine.js`)**:
-   - Converts seed strings to 32-bit hashes via FNV-1a.
-   - Generates unbiased permutations using Fisher-Yates array shuffling.
+   - Converts seed strings to a 32-bit unsigned integer using a bitwise multiplier hash (`1779033703 ^ str.length` with multiplier `3432918353` and rotate-13).
+   - Feeds the hash into the **Mulberry32 PRNG** to produce unbiased permutations via the Fisher-Yates array shuffling algorithm.
 4. **Adaptive Engine (`server/services/adaptiveEngine.js`)**:
-   - Calculates cognitive efficiency and outputs explainable promotion/demotion recommendations.
+   - Calculates cognitive efficiency and outputs explainable promotion/demotion recommendations (`adaptation.nextDifficulty`), which serves as the strict single source of truth for the game client.
 5. **Session Store (`server/services/sessionStore.js`)**:
    - Thread-safe persistence maintaining the latest 200 sessions in memory with asynchronous disk flush to `server/data/sessions.json`.
 
@@ -138,9 +138,9 @@ The project follows a decoupled, three-tier client-server architecture:
 | **Duplicate-Click Prevention** | Clicking an already revealed card triggers an early return; no duplicate moves are counted. |
 | **Matched-Card Protection** | Successfully matched cards receive the `.matched` CSS class, disabling pointer events and locking them permanently face-up. |
 | **Active Millisecond Timer** | Timer measures actual gameplay duration in milliseconds, automatically pausing when the browser tab blurs (`document.hidden`). |
-| **Safe Restart Teardown** | Hitting the **🔴 Home / Restart** button clears all pending timeouts (`clearTimeout(this.pendingFlipTimeout)`), preventing ghost flips in the next session. |
+| **Universal Restart Teardown** | Hitting the **🔴 Home / Restart** button invokes `clearAllPendingTimers()`, synchronously cancelling mismatch resolution, card preview, peek duration, match popup, countdown intervals, and game clock. |
 | **Meme Match Celebration** | Matching a pair triggers an animated pop-up modal showing the meme's image, title, and iconic catchphrase. |
-| **Adaptive Progression** | Automatically calculates cognitive efficiency and escalates players to Level 2 (6×6 Matrix, 18 pairs) or steps down to Tutorial (3×4 Grid). |
+| **Adaptive Progression** | Automatically calculates cognitive efficiency and escalates players to Level 2 (6×6 Matrix, 18 pairs) or steps down to Tutorial (3×4 Grid) using `adaptation.nextDifficulty` as the single source of truth. |
 | **Anonymous Telemetry Logging** | Aggregates moves, elapsed seconds, rapid clicks rejected, and efficiency scores accessible via `/api/game/analytics`. |
 
 ---
@@ -168,6 +168,8 @@ $$\text{Cognitive Efficiency (\%)} = \left(\frac{\text{Theoretical Minimum Moves
 | **Standard (4×4)** | `RULE_MAINTAIN_BASELINE` | $15 \le \text{Moves} \le 21$ **AND** $36\text{s} \le \text{Time} \le 64\text{s}$ | **Standard (4×4)** | Steady baseline performance. Retains current difficulty. |
 | **Novice (3×4)** | `RULE_TUTORIAL_CLEARED` | $\text{Moves} \le 10$ **AND** $\text{Time} \le 25\text{s}$ | **Standard (4×4)** | Baseline working memory verified; promotes to standard 8-pair matrix. |
 | **Advanced (6×6)** | `RULE_OVERLOAD_STEPDOWN` | $\text{Moves} \ge 45$ **OR** $\text{Time} \ge 120\text{s}$ | **Standard (4×4)** | Matrix fatigue detected; steps down to standard 4×4 board. |
+
+*Note: The frontend `triggerLevelTransitionAnimation()` strictly respects `adaptation.nextDifficulty` from the backend adaptive engine, ensuring demotions to Novice or promotions to Advanced execute faithfully without overrides.*
 
 ---
 
@@ -272,42 +274,45 @@ The server exposes 5 clean, self-documenting REST endpoints:
 
 # 9. Automated Testing & Verification Suite
 
-All 20 test cases pass cleanly via Jest and Supertest across 3 test suites:
+All **24 test cases pass cleanly** via Jest across 4 test suites:
 
 ```
-PASS server/tests/api.test.js
-  PS09 Memory Game API Integration Tests
-    √ GET /api/health returns 200 and healthy status (24 ms)
-    √ GET /api/game/new generates a valid default 4x4 board with 8 pairs (18 ms)
-    √ GET /api/game/new is deterministic for identical seeds (14 ms)
-    √ GET /api/game/new rejects invalid difficulty parameter with 400 (10 ms)
-    √ POST /api/game/session records session and returns explainable promotion (26 ms)
-    √ POST /api/game/session returns demotion explanation for high moves and latency (15 ms)
-    √ POST /api/game/session rejects requests missing required metrics with 400 (9 ms)
-    √ GET /api/game/analytics returns aggregate telemetry and session history (12 ms)
-    √ GET /api/game/rules returns documented adaptation matrix schema (8 ms)
+PASS server/tests/concurrencyRestart.test.js (4 tests)
+  √ FLIP A -> FLIP B (MISMATCH) -> RESTART IMMEDIATELY -> ADVANCE TIMERS -> NEW BOARD UNCHANGED (18 ms)
+  √ Restart immediately clears pending peekAll() timer and leaves new board intact (12 ms)
+  √ Restart immediately clears pending final-win transition timer (14 ms)
+  √ triggerLevelTransitionAnimation strictly uses adaptation.nextDifficulty as single source of truth (8 ms)
 
-PASS server/tests/adaptiveEngine.test.js
-  AdaptiveEngine - Cognitive Metrics & Explainable Rules
-    √ calculateMetrics accurately computes cognitive efficiency and ratios (4 ms)
-    √ evaluateSession promotes Standard to Advanced under high performance threshold (3 ms)
-    √ evaluateSession demotes Standard to Novice under cognitive fatigue threshold (2 ms)
-    √ evaluateSession maintains Standard within baseline moves and time window (2 ms)
-    √ evaluateSession promotes Novice to Standard when tutorial thresholds are met (2 ms)
-    √ evaluateSession steps down Advanced to Standard under high matrix fatigue (2 ms)
+PASS server/tests/api.test.js (9 tests)
+  √ GET /api/health returns 200 and healthy status (24 ms)
+  √ GET /api/game/new generates a valid default 4x4 board with 8 pairs (18 ms)
+  √ GET /api/game/new is deterministic for identical seeds (14 ms)
+  √ GET /api/game/new rejects invalid difficulty parameter with 400 (10 ms)
+  √ POST /api/game/session records session and returns explainable promotion (26 ms)
+  √ POST /api/game/session returns demotion explanation for high moves and latency (15 ms)
+  √ POST /api/game/session rejects requests missing required metrics with 400 (9 ms)
+  √ GET /api/game/analytics returns aggregate telemetry and session history (12 ms)
+  √ GET /api/game/rules returns documented adaptation matrix schema (8 ms)
 
-PASS server/tests/seedEngine.test.js
-  SeedEngine - PRNG Determinism & Board Generation
-    √ Mulberry32 PRNG produces identical sequence for identical seeds (3 ms)
-    √ Mulberry32 PRNG produces different sequences for different seeds (2 ms)
-    √ generateBoard generates exactly 8 unique pairs (16 cards) for standard difficulty (4 ms)
-    √ generateBoard generates 6 pairs for novice and 18 pairs for advanced (5 ms)
-    √ generateBoard assigns valid pairIds and identical meme images for pairs (3 ms)
+PASS server/tests/adaptiveEngine.test.js (6 tests)
+  √ calculateMetrics accurately computes cognitive efficiency and ratios (4 ms)
+  √ evaluateSession promotes Standard to Advanced under high performance threshold (3 ms)
+  √ evaluateSession demotes Standard to Novice under cognitive fatigue threshold (2 ms)
+  √ evaluateSession maintains Standard within baseline moves and time window (2 ms)
+  √ evaluateSession promotes Novice to Standard when tutorial thresholds are met (2 ms)
+  √ evaluateSession steps down Advanced to Standard under high matrix fatigue (2 ms)
 
-Test Suites: 3 passed, 3 total
-Tests:       20 passed, 20 total
+PASS server/tests/seedEngine.test.js (5 tests)
+  √ Mulberry32 PRNG produces identical sequence for identical seeds (3 ms)
+  √ Mulberry32 PRNG produces different sequences for different seeds (2 ms)
+  √ generateBoard generates exactly 8 unique pairs (16 cards) for standard difficulty (4 ms)
+  √ generateBoard generates 6 pairs for novice and 18 pairs for advanced (5 ms)
+  √ generateBoard assigns valid pairIds and identical meme images for pairs (3 ms)
+
+Test Suites: 4 passed, 4 total
+Tests:       24 passed, 24 total
 Snapshots:   0 total
-Time:        1.902 s
+Time:        2.345 s
 ```
 
 ---
@@ -328,7 +333,7 @@ All configurations are managed through credential-free defaults and injected sec
 
 ### 10.3. CI/CD & Deployment Process
 1. GitHub Actions connects securely to Azure Entra ID using **OpenID Connect (OIDC)** federated credentials, eliminating long-lived secrets.
-2. The pipeline executes `npm ci` and `npm test`. Upon all 20 tests passing, it builds and pushes the Docker container to Azure Container Registry (ACR) and triggers rolling zero-downtime deployment.
+2. The pipeline executes `npm ci` and `npm test`. Upon all 24 tests passing, it builds and pushes the Docker container to Azure Container Registry (ACR) and triggers rolling zero-downtime deployment.
 
 ### 10.4. Monitoring & Cost Control Assumptions
 - **Liveness Probes**: Azure checks `GET /api/health` every 30 seconds for automatic container restart upon failure.
@@ -380,9 +385,9 @@ All configurations are managed through credential-free defaults and injected sec
 
 ---
 
-### Figure 8: Automated Test Suite Results (20 of 20 Tests Passed)
+### Figure 8: Automated Test Suite Results (24 of 24 Tests Passed)
 ![Test Results](./screenshots/09_test_results.png)
-*Jest test runner confirming 100% pass rate across API integration, adaptive engine, and seed determinism test suites.*
+*Jest test runner confirming 100% pass rate across API integration, adaptive engine, seed determinism, and concurrency restart test suites.*
 
 ---
 

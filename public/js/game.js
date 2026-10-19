@@ -21,6 +21,9 @@ class SynapseGame {
     this.currentLevel = 1;
     this.matchPopupTimeout = null;
     this.levelTransitionInterval = null;
+    this.initialPreviewTimeout = null;
+    this.peekTimeout = null;
+    this.finalWinTimeout = null;
     
     // Active Time Tracking
     this.timerInterval = null;
@@ -40,6 +43,47 @@ class SynapseGame {
 
     // UI elements cache
     this.dom = {};
+  }
+
+  /**
+   * Universal timer cancellation for clean teardown.
+   * Cancels mismatch resolution, preview, peek, win transition, match popup,
+   * level countdown, and active game clock.
+   */
+  clearAllPendingTimers() {
+    if (this.pendingFlipTimeout !== null) {
+      clearTimeout(this.pendingFlipTimeout);
+      this.pendingFlipTimeout = null;
+      this.telemetry.timerResetsHandled++;
+      this.logEvent('Pending flip-back timer CANCELLED. Zero ghost flips guaranteed.', 'success');
+    }
+
+    if (this.initialPreviewTimeout !== null) {
+      clearTimeout(this.initialPreviewTimeout);
+      this.initialPreviewTimeout = null;
+    }
+
+    if (this.peekTimeout !== null) {
+      clearTimeout(this.peekTimeout);
+      this.peekTimeout = null;
+    }
+
+    if (this.finalWinTimeout !== null) {
+      clearTimeout(this.finalWinTimeout);
+      this.finalWinTimeout = null;
+    }
+
+    if (this.matchPopupTimeout !== null) {
+      clearTimeout(this.matchPopupTimeout);
+      this.matchPopupTimeout = null;
+    }
+
+    if (this.levelTransitionInterval !== null) {
+      clearInterval(this.levelTransitionInterval);
+      this.levelTransitionInterval = null;
+    }
+
+    this.stopTimer();
   }
 
   init() {
@@ -150,24 +194,18 @@ class SynapseGame {
   }
 
   /**
-   * Safe restart: Cancels pending timer, resets state, builds fresh board.
+   * Safe restart: Cancels ALL pending timers, resets state, builds fresh board.
    * Crucial PS09 Requirement: actions from old game MUST NEVER leak into new game.
    */
   restart() {
-    // 1. Cancel pending mismatch resolution timer immediately
-    if (this.pendingFlipTimeout !== null) {
-      clearTimeout(this.pendingFlipTimeout);
-      this.pendingFlipTimeout = null;
-      this.telemetry.timerResetsHandled++;
-      this.logEvent('Pending flip-back timer CANCELLED. Zero ghost flips guaranteed.', 'success');
-    }
+    // 1. Cancel ALL pending timers and intervals synchronously
+    this.clearAllPendingTimers();
 
     // 2. Clear state locks
     this.isResolvingPair = false;
     this.flippedCards = [];
 
     // 3. Reset metrics & timer
-    this.stopTimer();
     this.moves = 0;
     this.pairsMatched = 0;
     this.elapsedActiveMs = 0;
@@ -183,9 +221,9 @@ class SynapseGame {
     this.closeModal(this.dom.winModal);
 
     // 4. Reload board with current seed and difficulty
-    const seed = this.dom.seedInput.value.trim() || this.currentSeed;
-    const diff = this.dom.difficultySelect.value || this.currentDifficulty;
-    this.loadNewGame(seed, diff);
+    const seed = this.dom.seedInput?.value?.trim() || this.currentSeed;
+    const diff = this.dom.difficultySelect?.value || this.currentDifficulty;
+    return this.loadNewGame(seed, diff);
   }
 
   /**
@@ -195,11 +233,8 @@ class SynapseGame {
     this.currentSeed = seed || 'ALPHA-01';
     this.currentDifficulty = difficulty || 'standard';
 
-    // Clear any lingering pending timer
-    if (this.pendingFlipTimeout !== null) {
-      clearTimeout(this.pendingFlipTimeout);
-      this.pendingFlipTimeout = null;
-    }
+    // Clear all lingering pending timers before initializing new board
+    this.clearAllPendingTimers();
 
     this.isResolvingPair = false;
     this.flippedCards = [];
@@ -208,25 +243,40 @@ class SynapseGame {
     this.elapsedActiveMs = 0;
     this.isGameActive = false;
     this.isGameWon = false;
-    this.stopTimer();
 
-    try {
-      const response = await fetch(`/api/game/new?seed=${encodeURIComponent(this.currentSeed)}&difficulty=${this.currentDifficulty}`);
-      if (!response.ok) throw new Error('API request failed');
-      const json = await response.json();
-      this.boardData = json.data;
-    } catch (err) {
-      console.warn('Backend fetch failed, utilizing client-side deterministic fallback:', err);
-      this.boardData = window.SynapseSeedClient.generateBoard(this.currentSeed, this.currentDifficulty);
+    const hasBrowserOrigin = typeof window !== 'undefined' && window.location && window.location.origin;
+    if (hasBrowserOrigin && typeof fetch === 'function') {
+      try {
+        const response = await fetch(`/api/game/new?seed=${encodeURIComponent(this.currentSeed)}&difficulty=${this.currentDifficulty}`);
+        if (!response.ok) throw new Error('API request failed');
+        const json = await response.json();
+        this.boardData = json.data;
+      } catch (err) {
+        if (window.SynapseSeedClient && window.SynapseSeedClient.generateBoard) {
+          this.boardData = window.SynapseSeedClient.generateBoard(this.currentSeed, this.currentDifficulty);
+        }
+      }
+    } else {
+      if (typeof window !== 'undefined' && window.SynapseSeedClient && window.SynapseSeedClient.generateBoard) {
+        this.boardData = window.SynapseSeedClient.generateBoard(this.currentSeed, this.currentDifficulty);
+      }
     }
 
-    this.totalPairs = this.boardData.pairs;
-    this.renderBoard();
-    this.updateDashboardMetrics();
-    this.logEvent(`Matrix initialized: ${this.boardData.rows}×${this.boardData.cols} grid (${this.totalPairs} pairs). Seed: [${this.currentSeed}]`, 'info');
+    if (this.boardData) {
+      this.totalPairs = this.boardData.pairs;
+      this.renderBoard();
+      this.updateDashboardMetrics();
+      this.logEvent(`Matrix initialized: ${this.boardData.rows}×${this.boardData.cols} grid (${this.totalPairs} pairs). Seed: [${this.currentSeed}]`, 'info');
 
-    // Initial 1.2s quick preview so user immediately sees all meme photos!
-    setTimeout(() => this.peekAll(1200), 300);
+      // Initial 1.2s quick preview so user immediately sees all meme photos!
+      if (this.initialPreviewTimeout !== null) {
+        clearTimeout(this.initialPreviewTimeout);
+      }
+      this.initialPreviewTimeout = setTimeout(() => {
+        this.peekAll(1200);
+        this.initialPreviewTimeout = null;
+      }, 300);
+    }
   }
 
   peekAll(durationMs = 3000) {
@@ -235,17 +285,21 @@ class SynapseGame {
     if (window.synapseAudio) window.synapseAudio.playFlip();
 
     this.cards.forEach(c => {
-      if (!c.isMatched) {
+      if (!c.isMatched && c.element) {
         c.element.classList.add('flipped');
       }
     });
 
-    setTimeout(() => {
+    if (this.peekTimeout !== null) {
+      clearTimeout(this.peekTimeout);
+    }
+    this.peekTimeout = setTimeout(() => {
       this.cards.forEach(c => {
-        if (!c.isMatched && !c.isFlipped) {
+        if (!c.isMatched && !c.isFlipped && c.element) {
           c.element.classList.remove('flipped');
         }
       });
+      this.peekTimeout = null;
       this.logEvent('Peek ended. Cards concealed.', 'info');
     }, durationMs);
   }
@@ -390,7 +444,11 @@ class SynapseGame {
 
       // Check win condition
       if (this.pairsMatched === this.totalPairs) {
-        setTimeout(() => {
+        if (this.finalWinTimeout !== null) {
+          clearTimeout(this.finalWinTimeout);
+        }
+        this.finalWinTimeout = setTimeout(() => {
+          this.finalWinTimeout = null;
           this.closeMatchPopup();
           this.handleGameWon();
         }, 1400);
@@ -498,10 +556,9 @@ class SynapseGame {
 
   triggerLevelTransitionAnimation(adaptation, metrics) {
     const nextLevel = this.currentLevel + 1;
-    let nextDifficulty = adaptation?.nextDifficulty || 'advanced';
-    if (this.currentDifficulty === 'novice') nextDifficulty = 'standard';
-    else if (this.currentDifficulty === 'standard') nextDifficulty = 'advanced';
-    else nextDifficulty = 'advanced';
+    // CRITICAL FIX: adaptation.nextDifficulty from the backend adaptive engine is the strict single source of truth!
+    const nextDifficulty = adaptation?.nextDifficulty || this.currentDifficulty;
+    const action = adaptation?.action || 'MAINTAIN';
 
     const diffLabels = {
       novice: 'NPC Tutorial (3×4 Matrix)',
@@ -511,11 +568,25 @@ class SynapseGame {
     const nextDiffLabel = diffLabels[nextDifficulty] || nextDifficulty.toUpperCase();
 
     const titleEl = document.getElementById('level-transition-title');
-    if (titleEl) titleEl.textContent = `LEVEL ${this.currentLevel} COMPLETE!`;
+    if (titleEl) {
+      if (action === 'PROMOTE') {
+        titleEl.textContent = `LEVEL ${this.currentLevel} COMPLETE! PROMOTED!`;
+      } else if (action === 'DEMOTE') {
+        titleEl.textContent = `LEVEL ${this.currentLevel} COMPLETE! RECOVERY MODE`;
+      } else {
+        titleEl.textContent = `LEVEL ${this.currentLevel} COMPLETE!`;
+      }
+    }
 
     const subEl = document.getElementById('level-transition-sub');
     if (subEl) {
-      subEl.innerHTML = `Escalating into <strong>Level ${nextLevel}: ${nextDiffLabel}</strong>`;
+      if (action === 'PROMOTE') {
+        subEl.innerHTML = `Ascending into <strong>Level ${nextLevel}: ${nextDiffLabel}</strong>`;
+      } else if (action === 'DEMOTE') {
+        subEl.innerHTML = `Stepping down into <strong>Level ${nextLevel}: ${nextDiffLabel}</strong>`;
+      } else {
+        subEl.innerHTML = `Continuing at <strong>Level ${nextLevel}: ${nextDiffLabel}</strong>`;
+      }
     }
 
     const statMoves = document.getElementById('trans-stat-moves');
@@ -743,8 +814,15 @@ class SynapseGame {
   }
 }
 
-// Global game instance
-window.synapseGame = new SynapseGame();
-window.addEventListener('DOMContentLoaded', () => {
-  window.synapseGame.init();
-});
+// Global game instance for browser environments
+if (typeof window !== 'undefined') {
+  window.synapseGame = new SynapseGame();
+  window.addEventListener('DOMContentLoaded', () => {
+    window.synapseGame.init();
+  });
+}
+
+// Module export for Jest automated testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { SynapseGame };
+}

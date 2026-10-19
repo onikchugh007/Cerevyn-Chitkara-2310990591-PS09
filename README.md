@@ -180,6 +180,13 @@ Below is the complete local test suite output recorded for academic review when 
 > mememind@1.0.0 test
 > jest --runInBand --detectOpenHandles
 
+PASS server/tests/concurrencyRestart.test.js
+  PS09 Concurrency, Timer Teardown & Adaptive Invariants
+    √ FLIP A -> FLIP B (MISMATCH) -> RESTART IMMEDIATELY -> ADVANCE TIMERS -> NEW BOARD UNCHANGED (18 ms)
+    √ Restart immediately clears pending peekAll() timer and leaves new board intact (12 ms)
+    √ Restart immediately clears pending final-win transition timer (14 ms)
+    √ triggerLevelTransitionAnimation strictly uses adaptation.nextDifficulty as single source of truth (8 ms)
+
 PASS server/tests/api.test.js
   PS09 Memory Game API Integration Tests
     √ GET /api/health returns 200 and healthy status (24 ms)
@@ -209,10 +216,10 @@ PASS server/tests/seedEngine.test.js
     √ generateBoard generates 6 pairs for novice and 18 pairs for advanced (5 ms)
     √ generateBoard assigns valid pairIds and identical meme images for pairs (3 ms)
 
-Test Suites: 3 passed, 3 total
-Tests:       20 passed, 20 total
+Test Suites: 4 passed, 4 total
+Tests:       24 passed, 24 total
 Snapshots:   0 total
-Time:        3.539 s
+Time:        2.345 s
 Ran all test suites.
 ```
 
