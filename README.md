@@ -16,6 +16,8 @@
 | **Repository Name** | `Cerevyn-Chitkara-210990591-PS09` |
 | **Evaluated Release Tag** | `v1.1.0` (Multi-Device Responsive Release) |
 | **CI / CD Pipeline Status** | ![CI](https://github.com/onikchugh007/Cerevyn-Chitkara-210990591-PS09/actions/workflows/ci.yml/badge.svg) |
+| **Project Document (Markdown)** | [📄 docs/PROJECT_DOCUMENT_PS09.md](./docs/PROJECT_DOCUMENT_PS09.md) |
+| **Project Document (Print / PDF)** | [🖨️ docs/PROJECT_DOCUMENT_PS09.html](./docs/PROJECT_DOCUMENT_PS09.html) |
 
 ---
 
