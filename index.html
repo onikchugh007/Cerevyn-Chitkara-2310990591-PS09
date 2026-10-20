@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>MEMEMIND — Adaptive Memory Game</title>
+  <meta name="description"
+    content="Adaptive Meme Memory Matching game with animated 3D arcade cards, iconic meme photos, and explainable difficulty calibration.">
+
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css?v=26">
+</head>
+
+<body>
+
+  <!-- Scenic Arcade World Background (Distant Mountains, Neon Skyline & Ambient Twinkles) -->
+  <div class="arcade-scene-background" id="arcade-scene-bg">
+    <div class="scene-aurora-glow"></div>
+    <div class="scene-ground-fog"></div>
+    <div class="ambient-particles" id="ambient-particles"></div>
+  </div>
+
+  <!-- Top Arcade HUD & Action Controls -->
+  <header class="arcade-top-nav">
+    <div class="top-nav-left">
+      <!-- 🔴 Home / Restart Button -->
+      <button id="btn-restart-round" class="btn-arcade-round red" title="Home / Restart Game">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </button>
+
+      <!-- 🔊 Sound Button -->
+      <button id="btn-sound-round" class="btn-arcade-round amber" title="Sound Volume">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+      </button>
+
+      <!-- 👁️ Peek Button -->
+      <button id="btn-peek-round" class="btn-arcade-round cyan" title="Peek All Cards (3s)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+
+      <!-- 🖼️ Meme Photo Gallery Button (Emoji Only Circular Button) -->
+      <button id="btn-gallery-modal" class="btn-arcade-round purple" title="Meme Photo Gallery">
+        <span style="font-size: 1.25rem; line-height: 1;">🖼️</span>
+      </button>
+
+      <!-- 📜 Rules Documentation Button (Emoji Only Circular Button) -->
+      <button id="btn-rules-modal" class="btn-arcade-round indigo" title="Game Rules & Calibration">
+        <span style="font-size: 1.25rem; line-height: 1;">📜</span>
+      </button>
+
+      <!-- 📊 Telemetry Button (Emoji Only Circular Button) -->
+      <button id="btn-analytics-modal" class="btn-arcade-round emerald" title="Session Telemetry">
+        <span style="font-size: 1.25rem; line-height: 1;">📊</span>
+      </button>
+    </div>
+
+    <div class="top-nav-right">
+      <!-- Arcade Scoreboard HUD -->
+      <div class="arcade-scoreboard-banner">
+        <div class="banner-unit brand">
+          <span>MEMEMIND</span>
+          <small id="hud-level-indicator">LEVEL 1</small>
+        </div>
+        <div class="banner-unit">
+          <span id="hud-pairs-count">0/8</span>
+          <small>PAIRS</small>
+        </div>
+        <div class="banner-unit">
+          <span id="hud-moves-count">0</span>
+          <small>MOVES</small>
+        </div>
+        <div class="banner-unit active">
+          <span id="hud-iq-count">100%</span>
+          <small>MEME IQ</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Arcade Stage / Cabinet Arena -->
+  <main class="arcade-stage-container">
+
+    <!-- Grand Marquee Header -->
+    <div class="marquee-assembly">
+      <div class="marquee-sign">
+        <div class="marquee-bulbs left"></div>
+        <div class="marquee-title-box">
+          <h1 class="marquee-title">MEME HALL OF FAME</h1>
+        </div>
+        <div class="marquee-bulbs right"></div>
+      </div>
+
+      <!-- Live Digital Clock & Scoreboard Display -->
+      <div class="arcade-digital-clock-pill">
+        <div class="clock-box time">
+          <span id="dormer-time-val">00:00</span>
+          <small>ACTIVE TIME</small>
+        </div>
+        <div class="clock-box score">
+          <span id="dormer-score-val">1000</span>
+          <small>SCORE</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arcade Card Matrix Arena -->
+    <div class="arcade-cabinet-body">
+      <div id="card-grid" class="card-grid grid-4x4">
+        <!-- Rendered dynamically by game.js as high-gloss arcade meme cards -->
+      </div>
+    </div>
+
+    <!-- Cabinet Lower Control Deck -->
+    <div class="arcade-control-deck">
+      <div class="deck-item">
+        <label for="difficulty-select">Difficulty:</label>
+        <select id="difficulty-select" class="arcade-select">
+          <option value="novice">NPC Tutorial (3×4 - 6 Pairs)</option>
+          <option value="standard" selected>Dank Meme Matrix (4×4 - 8 Pairs)</option>
+          <option value="advanced">Gigachad Galaxy (6×6 - 18 Pairs)</option>
+        </select>
+      </div>
+
+      <div class="deck-item">
+        <label for="seed-input">Seed:</label>
+        <div class="arcade-seed-box">
+          <input type="text" id="seed-input" class="arcade-seed-input" value="DOGE-01" spellcheck="false"
+            placeholder="SEED">
+          <button id="btn-new-seed" class="btn-arcade-seed" title="New Random Seed">⚡ Seed</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Match Celebration Popup Modal (User's Reference Image) -->
+  <div id="match-popup-modal" class="match-popup-overlay">
+    <div class="match-popup-card" id="match-popup-card">
+      <button class="match-popup-close-btn" id="btn-close-match-popup" title="Close">&times;</button>
+
+      <div class="match-photo-frame">
+        <img id="match-popup-img" src="" alt="Matched Meme" />
+      </div>
+
+      <div class="match-popup-body">
+        <h3 id="match-popup-title" class="match-popup-heading">
+          It's a match! Well done! You found Doge
+        </h3>
+        <p id="match-popup-sub" class="match-popup-subtitle">
+          "Much Memory, Wow"
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level 2 / Continuous Next Level Cinematic Transition Overlay -->
+  <div id="level-transition-modal" class="level-transition-overlay">
+    <div class="level-transition-card">
+      <div class="level-transition-badge">ROUND CLEARED! 🏆</div>
+      <h2 id="level-transition-title" class="level-transition-title">LEVEL 1 COMPLETE</h2>
+      <div class="level-transition-subtitle" id="level-transition-sub">
+        Preparing to escalate into <strong>Level 2: Gigachad Galaxy (6×6 Matrix)</strong>
+      </div>
+
+      <div class="level-transition-stats">
+        <div class="level-stat-box">
+          <span id="trans-stat-moves">14</span>
+          <small>MOVES</small>
+        </div>
+        <div class="level-stat-box">
+          <span id="trans-stat-time">28.4s</span>
+          <small>TIME</small>
+        </div>
+        <div class="level-stat-box">
+          <span id="trans-stat-iq">100%</span>
+          <small>MEME IQ</small>
+        </div>
+      </div>
+
+      <div class="level-countdown-bar-container">
+        <div class="level-countdown-bar" id="level-countdown-bar"></div>
+      </div>
+
+      <div class="level-countdown-text" id="level-countdown-text">
+        Entering Level 2 in <span id="countdown-number">3</span>s...
+      </div>
+
+      <button id="btn-continue-level-now" class="btn-primary level-continue-btn">
+        Play Level 2 Now ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- Victory / Calibration Modal -->
+  <div id="win-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" style="color: #34d399;">🏆 Victory!</h2>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">
+            All meme pairs matched successfully.
+          </p>
+        </div>
+        <button class="modal-close-btn"
+          onclick="window.synapseGame.closeModal(document.getElementById('win-modal'))">&times;</button>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="modal-stat-pill">
+          <div id="modal-metric-moves" class="modal-stat-val">0</div>
+          <div class="modal-stat-lbl">Moves Taken</div>
+        </div>
+        <div class="modal-stat-pill">
+          <div id="modal-metric-time" class="modal-stat-val">0.0s</div>
+          <div class="modal-stat-lbl">Active Time</div>
+        </div>
+        <div class="modal-stat-pill">
+          <div id="modal-metric-efficiency" class="modal-stat-val">100%</div>
+          <div class="modal-stat-lbl">Meme IQ</div>
+        </div>
+      </div>
+
+      <div id="modal-adaptation-card" class="adaptation-card promoted">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.72rem; font-family: var(--font-mono); font-weight: 700; color: #34d399;">
+            ADAPTIVE CALIBRATION
+          </span>
+          <span id="modal-adapt-action-badge" class="evaluator-badge">PROMOTED</span>
+        </div>
+        <h3 id="modal-adapt-title"
+          style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem; color: #6ee7b7;">
+          Next Difficulty Level
+        </h3>
+        <p id="modal-adapt-reason" style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.45;">
+          Explanation of why the next difficulty was chosen.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+        <button id="btn-next-round" class="btn-primary" style="flex: 1;">
+          Enter Next Difficulty ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules Documentation Modal -->
+  <div id="rules-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">📜 Game Rules & Calibration</h2>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">
+            Cognitive progression rules and adaptive difficulty thresholds.
+          </p>
+        </div>
+        <button class="modal-close-btn"
+          onclick="document.getElementById('rules-modal').classList.remove('active')">&times;</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Current Mode</th>
+              <th>Trigger Threshold</th>
+              <th>Next Mode</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Dank Matrix (4×4)</td>
+              <td><code>Moves &le; 14 &amp; Time &le; 35s</code></td>
+              <td><strong style="color: #34d399">Gigachad Galaxy (6×6)</strong></td>
+              <td>High accuracy and speed; escalating to 18-pair matrix.</td>
+            </tr>
+            <tr>
+              <td>Dank Matrix (4×4)</td>
+              <td><code>Moves &ge; 22 &amp; Time &ge; 65s</code></td>
+              <td><strong style="color: #f87171">NPC Tutorial (3×4)</strong></td>
+              <td>Cognitive fatigue detected; stepping down to 6-pair grid.</td>
+            </tr>
+            <tr>
+              <td>Dank Matrix (4×4)</td>
+              <td><code>15-21 Moves &amp; 36-64s</code></td>
+              <td><strong style="color: #38bdf8">Dank Matrix (4×4)</strong></td>
+              <td>Steady baseline performance; maintaining current difficulty.</td>
+            </tr>
+            <tr>
+              <td>NPC Tutorial (3×4)</td>
+              <td><code>Moves &le; 10 &amp; Time &le; 25s</code></td>
+              <td><strong style="color: #34d399">Dank Matrix (4×4)</strong></td>
+              <td>Tutorial cleared; promoting to standard 8-pair matrix.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        style="background: #110a26; padding: 0.85rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <strong>Meme IQ Formula:</strong> <code>Cognitive Efficiency (%) = (Total Pairs / Moves) &times; 100</code>.<br>
+        <strong>Safety Invariant:</strong> Third clicks are blocked during comparison. Restart cleanly aborts pending
+        timers.
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn-primary" onclick="document.getElementById('rules-modal').classList.remove('active')">
+          Close Rules
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anonymous Analytics Modal -->
+  <div id="analytics-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">📊 Session Telemetry</h2>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">
+            Live session tracking logged anonymously to the backend.
+          </p>
+        </div>
+        <button class="modal-close-btn"
+          onclick="document.getElementById('analytics-modal').classList.remove('active')">&times;</button>
+      </div>
+
+      <div class="modal-stats-grid">
+        <div class="modal-stat-pill">
+          <div id="analytics-total-sessions" class="modal-stat-val">0</div>
+          <div class="modal-stat-lbl">Total Rounds</div>
+        </div>
+        <div class="modal-stat-pill">
+          <div id="analytics-avg-moves" class="modal-stat-val">0</div>
+          <div class="modal-stat-lbl">Avg Moves</div>
+        </div>
+        <div class="modal-stat-pill">
+          <div id="analytics-avg-time" class="modal-stat-val">0s</div>
+          <div class="modal-stat-lbl">Avg Time</div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Difficulty</th>
+              <th>Moves</th>
+              <th>Time</th>
+              <th>Meme IQ</th>
+              <th>Adaptation</th>
+            </tr>
+          </thead>
+          <tbody id="analytics-table-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: #94a3b8;">No session records yet. Complete a round to
+                generate telemetry!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn-primary" onclick="document.getElementById('analytics-modal').classList.remove('active')">
+          Close Telemetry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meme Photo Gallery Modal -->
+  <div id="gallery-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 820px; max-height: 85vh;">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">🖼️ Meme Photo Gallery</h2>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem;">
+            22 authentic internet meme photos in the arcade matrix.
+          </p>
+        </div>
+        <button class="modal-close-btn"
+          onclick="document.getElementById('gallery-modal').classList.remove('active')">&times;</button>
+      </div>
+
+      <div style="overflow-y: auto; max-height: 60vh; padding-right: 0.5rem;">
+        <div id="gallery-grid"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.85rem;">
+          <!-- Dynamically populated from CARD_SYMBOLS -->
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn-primary" onclick="document.getElementById('gallery-modal').classList.remove('active')">
+          Close Gallery
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ambient Particles and Modal Event Handlers -->
+  <script>
+    // Generate soft floating ambient twinkles
+    (function initParticles() {
+      const container = document.getElementById('ambient-particles');
+      if (!container) return;
+      const symbols = ['✦', '★', '⚡', '•'];
+      for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.top = `${Math.random() * 80}%`;
+        p.style.fontSize = `${0.6 + Math.random() * 0.9}rem`;
+        p.style.animationDuration = `${3 + Math.random() * 5}s`;
+        p.style.animationDelay = `${Math.random() * 4}s`;
+        container.appendChild(p);
+      }
+    })();
+
+    // Modal button listeners
+    document.getElementById('btn-rules-modal')?.addEventListener('click', () => {
+      document.getElementById('rules-modal').classList.add('active');
+    });
+
+    document.getElementById('btn-gallery-modal')?.addEventListener('click', () => {
+      document.getElementById('gallery-modal').classList.add('active');
+      const galleryGrid = document.getElementById('gallery-grid');
+      if (galleryGrid && galleryGrid.children.length === 0 && window.SynapseSeedClient && window.SynapseSeedClient.CARD_SYMBOLS) {
+        galleryGrid.innerHTML = window.SynapseSeedClient.CARD_SYMBOLS.map(m => `
+          <div style="background: #110a26; border: 2px solid rgba(168, 85, 247, 0.4); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+            <img src="${m.imagePath}" alt="${m.name}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+            <div style="padding: 0.45rem; text-align: center; background: #190f38;">
+              <div style="font-size: 0.76rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.name}</div>
+              <div style="font-size: 0.62rem; color: #a855f7; font-family: monospace;">${m.subtitle || 'Photo Pair'}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    });
+
+    document.getElementById('btn-analytics-modal')?.addEventListener('click', async () => {
+      document.getElementById('analytics-modal').classList.add('active');
+      try {
+        const res = await fetch('/api/game/analytics');
+        if (!res.ok) return;
+        const data = await res.json();
+        const a = data.analytics;
+        document.getElementById('analytics-total-sessions').textContent = a.totalSessions || 0;
+        document.getElementById('analytics-avg-moves').textContent = a.averageMoves || 0;
+        document.getElementById('analytics-avg-time').textContent = (a.averageTimeSeconds || 0) + 's';
+
+        const tbody = document.getElementById('analytics-table-body');
+        if (data.recent && data.recent.length > 0) {
+          tbody.innerHTML = data.recent.map(r => `
+            <tr>
+              <td><code>${r.id.substr(-6)}</code></td>
+              <td>${r.difficulty}</td>
+              <td>${r.moves}</td>
+              <td>${r.time}s</td>
+              <td>${r.efficiency}%</td>
+              <td><span class="evaluator-badge" style="font-size:0.6rem;">${r.action}</span></td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {
+        console.warn('Could not load analytics:', e);
+      }
+    });
+  </script>
+
+  <!-- Client Game Scripts with Cache Busting -->
+  <script src="/js/audio.js?v=26"></script>
+  <script src="/js/seedClient.js?v=26"></script>
+  <script src="/js/game.js?v=26"></script>
+</body>
+
+</html>
