@@ -267,15 +267,6 @@ class SynapseGame {
       this.renderBoard();
       this.updateDashboardMetrics();
       this.logEvent(`Matrix initialized: ${this.boardData.rows}×${this.boardData.cols} grid (${this.totalPairs} pairs). Seed: [${this.currentSeed}]`, 'info');
-
-      // Initial 1.2s quick preview so user immediately sees all meme photos!
-      if (this.initialPreviewTimeout !== null) {
-        clearTimeout(this.initialPreviewTimeout);
-      }
-      this.initialPreviewTimeout = setTimeout(() => {
-        this.peekAll(1200);
-        this.initialPreviewTimeout = null;
-      }, 300);
     }
   }
 
